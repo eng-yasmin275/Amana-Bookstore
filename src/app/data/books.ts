@@ -874,5 +874,27 @@ export const books: Book[] = [
     reviewCount: 16,
     inStock: true,
     featured: true,
+  },
+
+{  id: '100',
+    title: 'YASMIN NASSAR',
+    author: 'Yasmin Nassar',
+    description: 'Life of Yasmin Nassar',
+    price: 100.00,
+    image: '/images/th.jpg',
+    isbn: '100-1001001001',
+    genre: ['Physics', 'Computer Science'],
+    tags: ['Quantum Computing', 'Information Theory', 'Quantum Algorithms'],
+    datePublished: '2025-09-06',
+    pages: 100,
+    language: 'English',
+    publisher: 'Al-Kindi Quantum Institute',
+    rating: 4.8,
+    reviewCount: 16,
+    inStock: true,
+    featured: true,
   }
+   
+
+
 ];
