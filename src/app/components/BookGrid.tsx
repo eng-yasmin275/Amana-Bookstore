@@ -3,7 +3,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Book } from '../types';
 import BookCard from './BookCard';
-import BookListItem from './BookListItem';
 import Pagination from './Pagination';
 
 interface BookGridProps {
@@ -15,20 +14,17 @@ const BookGrid: React.FC<BookGridProps> = ({ books = [], onAddToCart }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('All');
   const [sortBy, setSortBy] = useState('title');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(8);
-  const [featuredCarouselIndex, setFeaturedCarouselIndex] = useState(0);
 
   const featuredBooks = useMemo(() => books.filter((book) => book.featured), [books]);
   const booksPerPage = 4;
   const totalFeaturedPages = Math.ceil(featuredBooks.length / booksPerPage);
 
   const currentFeaturedBooks = useMemo(() => {
-    const startIndex = featuredCarouselIndex * booksPerPage;
+    const startIndex = currentPage * booksPerPage - booksPerPage;
     const endIndex = startIndex + booksPerPage;
     return featuredBooks.slice(startIndex, endIndex);
-  }, [featuredBooks, featuredCarouselIndex]);
+  }, [featuredBooks, currentPage]);
 
   const genres = useMemo(() => {
     const allGenres = books.flatMap((book) => book.genre);
@@ -44,35 +40,11 @@ const BookGrid: React.FC<BookGridProps> = ({ books = [], onAddToCart }) => {
       return matchesSearch && matchesGenre;
     });
 
-    const sorted = [...filtered].sort((a, b) => {
-      let comparison = 0;
-      switch (sortBy) {
-        case 'title':
-          comparison = a.title.localeCompare(b.title);
-          break;
-        case 'author':
-          comparison = a.author.localeCompare(b.author);
-          break;
-        case 'datePublished':
-          comparison =
-            new Date(a.datePublished).getTime() - new Date(b.datePublished).getTime();
-          break;
-        case 'rating':
-          comparison = a.rating - b.rating;
-          break;
-        case 'reviewCount':
-          comparison = a.reviewCount - b.reviewCount;
-          break;
-        case 'price':
-          comparison = a.price - b.price;
-          break;
-      }
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-
+    const sorted = [...filtered].sort((a, b) => a.title.localeCompare(b.title));
     return sorted;
-  }, [books, searchQuery, selectedGenre, sortBy, sortOrder]);
+  }, [books, searchQuery, selectedGenre]);
 
+  const itemsPerPage = 8;
   const paginatedBooks = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -83,7 +55,7 @@ const BookGrid: React.FC<BookGridProps> = ({ books = [], onAddToCart }) => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedGenre, sortBy, sortOrder, itemsPerPage]);
+  }, [searchQuery, selectedGenre, sortBy]);
 
   if (!books || books.length === 0) {
     return <p className="text-center text-gray-500">Loading books...</p>;
@@ -91,7 +63,7 @@ const BookGrid: React.FC<BookGridProps> = ({ books = [], onAddToCart }) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* 🔍 Filters and Sorting */}
+      {/* Filters */}
       <div className="flex flex-wrap justify-between items-center mb-6">
         <input
           type="text"
@@ -111,20 +83,9 @@ const BookGrid: React.FC<BookGridProps> = ({ books = [], onAddToCart }) => {
             </option>
           ))}
         </select>
-        <select
-          className="border p-2 rounded"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          <option value="title">Title</option>
-          <option value="author">Author</option>
-          <option value="price">Price</option>
-          <option value="rating">Rating</option>
-          <option value="reviewCount">Reviews</option>
-        </select>
       </div>
 
-      {/* 🏆 Featured Books Carousel */}
+      {/* Featured Books */}
       {featuredBooks.length > 0 && (
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4 text-center text-green-700">Featured Books</h2>
@@ -133,31 +94,25 @@ const BookGrid: React.FC<BookGridProps> = ({ books = [], onAddToCart }) => {
               <BookCard key={book.id} book={book} onAddToCart={onAddToCart} />
             ))}
           </div>
-          <div className="flex justify-center mt-4 space-x-4">
-            <button onClick={() => setFeaturedCarouselIndex((i) => (i === 0 ? totalFeaturedPages - 1 : i - 1))} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Previous</button>
-            <button onClick={() => setFeaturedCarouselIndex((i) => (i === totalFeaturedPages - 1 ? 0 : i + 1))} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Next</button>
-          </div>
         </section>
       )}
 
-      {/* 📚 All Books Grid */}
+      {/* All Books Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {paginatedBooks.map((book) => (
           <BookCard key={book.id} book={book} onAddToCart={onAddToCart} />
         ))}
       </div>
 
-      {/* 📄 Pagination */}
+      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-8">
-         <Pagination
-  currentPage={currentPage}
-  totalPages={totalPages}
-  onPageChange={setCurrentPage}
-  itemsPerPage={itemsPerPage}
-  totalItems={filteredAndSortedBooks.length}
-/>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredAndSortedBooks.length}
+        />
       )}
     </div>
   );
