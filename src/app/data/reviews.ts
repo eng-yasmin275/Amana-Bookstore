@@ -1,5 +1,7 @@
 // src/app/data/reviews.ts
-import { Review } from '../types';
+//import { Review } from '../types/index';
+import type { Review } from '../types/index.js';
+
 
 export const reviews: Review[] = [
   // Reviews for Classical Mechanics (book-1)

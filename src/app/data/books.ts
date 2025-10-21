@@ -1,5 +1,7 @@
 // src/app/data/books.ts
-import { Book } from '../types';
+//import { Book } from '../types/index';
+import type { Book } from '../types/index.js';
+
 
 export const books: Book[] = [
   // Physics Textbooks
